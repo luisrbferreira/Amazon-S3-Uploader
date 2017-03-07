@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
-using Amazon.S3;
-using Amazon.S3.Transfer;
+﻿using AmazonS3Uploader;
+using System;
 using System.Windows.Forms;
-using AmazonS3Uploader;
 
 namespace s3.amazon.com.docsamples
 {
