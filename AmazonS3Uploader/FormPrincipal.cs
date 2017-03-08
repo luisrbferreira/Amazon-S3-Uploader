@@ -1,24 +1,14 @@
-﻿using Amazon.S3;
-using Amazon.S3.Transfer;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace AmazonS3Uploader
 {
     public partial class frmPrincipal : Form
     {
-        static string existingBucketName = "teste-alba";       
-        private string delimiter = "/";
-        private string subFolderFlash = "Flash";
-
+        
         public frmPrincipal()
         {
             InitializeComponent();
@@ -48,39 +38,104 @@ namespace AmazonS3Uploader
             WaitForChangedResult wrc = fswFlash.WaitForChanged(WatcherChangeTypes.All, 10000);
         }
 
-        private void Upload(string filePath)
+        private void MonitorarHttp()
         {
+            FileSystemWatcher fswHttp = this.fileSystemWatcherHttp;
+
+            //Caminho da pasta a ser monitorada
+            fswHttp.Path = txtFlash.Text;
+
+            //Tipo de filtro a ser considerado
+            fswHttp.Filter = txtFiltro.Text;
+
+            //Atributos que irão disparar eventos
+            fswHttp.NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.CreationTime;
+
+            //Permitir o monitoramento
+            fswHttp.EnableRaisingEvents = true;
+
+            //Incluir monitoramento de SubDiretórios
+            fswHttp.IncludeSubdirectories = true;
+
+            //Classe WaitForChangedResults, passando o FSW com o método WaitForChanged e o
+            //parâmetro de modificações que ele irá aguardar, que no caso são todas
+            WaitForChangedResult wrc = fswHttp.WaitForChanged(WatcherChangeTypes.All, 10000);
+        }
+
+        private void FazerUploadAssync(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        {
+            AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate caller = new AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate(this.fazerUpload);
+            caller.BeginInvoke(subFolder, fileName, filePath, type, null, null);
+        }
+
+        private void ShowText(string text)
+        {
+            if (txtNotificacoes.InvokeRequired)
+            {
+                AmazonS3Uploader.Delegates.ShowTextDelegate textDelegate = new AmazonS3Uploader.Delegates.ShowTextDelegate(ShowText);
+
+                txtNotificacoes.Invoke(textDelegate, text);
+            }
+
+            else
+            {
+                txtNotificacoes.AppendText(text);
+            }
+        }
+
+        private void fazerUpload(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendFormat("Criado em: {0} {1}", filePath, Environment.NewLine);
+
+            Informacoes(fileName, type);
+
+            sb.AppendFormat("Transferindo o arquivo {0} para o servidor, aguarde...{1}", fileName, Environment.NewLine);
+
+            ShowText(sb.ToString());
+
+            bool mustRepeat = true;
+
             try
             {
-                Amazon.Util.ProfileManager.RegisterProfile("Luis Ferreira", "keyId", "secretKey");
-
-                TransferUtility fileTransferUtility = new
-                    TransferUtility(new AmazonS3Client(Amazon.RegionEndpoint.SAEast1));
-
-                // Specify advanced settings/options.
-                TransferUtilityUploadRequest fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                while (mustRepeat)
                 {
-                    BucketName = string.Concat(existingBucketName, delimiter, subFolderFlash),
-                    FilePath = filePath,
-                    StorageClass = S3StorageClass.ReducedRedundancy,
-                    PartSize = 6291456, // 6 MB.
-                    CannedACL = S3CannedACL.PublicRead
-                };
+                    Thread.Sleep(240000);
 
-                fileTransferUtility.Upload(fileTransferUtilityRequest);
+                    Application.DoEvents();
 
-                txtNotificacoes.Text = "Upload do arquivo completo";
+                    AmazonS3 s3 = new AmazonS3(this.ShowText, subFolder, fileName, filePath);
+
+                    s3.Upload();
+
+                    mustRepeat = false;
+                }
             }
-            catch (AmazonS3Exception s3Exception)
-            {
-                Console.WriteLine(s3Exception.Message,
-                                  s3Exception.InnerException);
-            }
+            catch { }
+        }
+
+        private void Informacoes(string fileName, WatcherChangeTypes type)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendFormat("--------------------------------------------------------------------------------------------------------------------------------------------------{0}Evento: {1} {2}", Environment.NewLine, type, Environment.NewLine);
+
+            sb.AppendFormat("Nome: {0} {1}", fileName, Environment.NewLine);
+
+            ShowText(sb.ToString());
         }
 
         private void fileSystemWatcherFlash_Created(object sender, FileSystemEventArgs e)
         {
-            Upload("D:\\Flash\\" + e.Name);
+            string subFolder = "Flash";
+            this.FazerUploadAssync(subFolder, e.Name, e.FullPath, e.ChangeType);
+        }
+
+        private void fileSystemWatcherHttp_Created(object sender, FileSystemEventArgs e)
+        {
+            string subFolder = "Http";
+            this.FazerUploadAssync(subFolder, e.Name, e.FullPath, e.ChangeType);
         }
     }
 }
