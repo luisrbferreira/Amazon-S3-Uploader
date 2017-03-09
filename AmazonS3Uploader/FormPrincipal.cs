@@ -107,7 +107,7 @@ namespace AmazonS3Uploader
 
                     AmazonS3 s3 = new AmazonS3(this.ShowText, subFolder, fileName, filePath);
 
-                    s3.Upload();
+                    s3.UploadFile();
 
                     mustRepeat = false;
                 }

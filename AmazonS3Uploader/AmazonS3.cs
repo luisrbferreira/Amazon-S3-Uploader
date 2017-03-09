@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Transfer;
 using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace AmazonS3Uploader
@@ -46,7 +47,7 @@ namespace AmazonS3Uploader
             set { this.filePath = value; }
         }
 
-        public void Upload()
+        public void UploadFile()
         {
             try
             {
@@ -55,17 +56,24 @@ namespace AmazonS3Uploader
                 TransferUtility fileTransferUtility = new
                     TransferUtility(new AmazonS3Client(Amazon.RegionEndpoint.SAEast1));
 
-                // Specify advanced settings/options.
-                TransferUtilityUploadRequest fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                using (FileStream fileToUpload =
+                    new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    BucketName = string.Concat(bucketName, delimiter, subFolder),
-                    FilePath = filePath,
-                    StorageClass = S3StorageClass.ReducedRedundancy,
-                    PartSize = 6291456, // 6 MB.
-                    CannedACL = S3CannedACL.PublicRead
-                };
+                    fileTransferUtility.Upload(fileToUpload,
+                                               string.Concat(bucketName, delimiter, subFolder), fileName);
+                }
 
-                fileTransferUtility.Upload(fileTransferUtilityRequest);
+                // Specify advanced settings/options.
+                //TransferUtilityUploadRequest fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                //{
+                //    BucketName = string.Concat(bucketName, delimiter, subFolder),
+                //    FilePath = filePath,
+                //    StorageClass = S3StorageClass.ReducedRedundancy,
+                //    PartSize = 6291456, // 6 MB.
+                //    CannedACL = S3CannedACL.PublicRead
+                //};
+
+                //fileTransferUtility.Upload(fileTransferUtilityRequest);
 
                 string message = string.Format("-------------------------------------------------------------------------------------------------------------------------------------------------{0}Upload do arquivo {1} feito com Sucesso!{2}", Environment.NewLine, fileName, Environment.NewLine);
 
