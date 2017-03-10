@@ -56,24 +56,17 @@ namespace AmazonS3Uploader
                 TransferUtility fileTransferUtility = new
                     TransferUtility(new AmazonS3Client(Amazon.RegionEndpoint.SAEast1));
 
-                using (FileStream fileToUpload =
-                    new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                //Specify advanced settings / options.
+                TransferUtilityUploadRequest fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
-                    fileTransferUtility.Upload(fileToUpload,
-                                               string.Concat(bucketName, delimiter, subFolder), fileName);
-                }
+                    BucketName = string.Concat(bucketName, delimiter, subFolder),
+                    FilePath = filePath,
+                    StorageClass = S3StorageClass.ReducedRedundancy,
+                    PartSize = 6291456, // 6 MB.
+                    CannedACL = S3CannedACL.PublicRead
+                };
 
-                // Specify advanced settings/options.
-                //TransferUtilityUploadRequest fileTransferUtilityRequest = new TransferUtilityUploadRequest
-                //{
-                //    BucketName = string.Concat(bucketName, delimiter, subFolder),
-                //    FilePath = filePath,
-                //    StorageClass = S3StorageClass.ReducedRedundancy,
-                //    PartSize = 6291456, // 6 MB.
-                //    CannedACL = S3CannedACL.PublicRead
-                //};
-
-                //fileTransferUtility.Upload(fileTransferUtilityRequest);
+                fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
 
                 string message = string.Format("-------------------------------------------------------------------------------------------------------------------------------------------------{0}Upload do arquivo {1} feito com Sucesso!{2}", Environment.NewLine, fileName, Environment.NewLine);
 

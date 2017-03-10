@@ -101,7 +101,7 @@ namespace AmazonS3Uploader
             {
                 while (mustRepeat)
                 {
-                    Thread.Sleep(240000);
+                    Thread.Sleep(5000);
 
                     Application.DoEvents();
 

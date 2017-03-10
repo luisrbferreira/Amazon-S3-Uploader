@@ -40,8 +40,8 @@
             this.lblFiltro = new System.Windows.Forms.Label();
             this.pcbConectta = new System.Windows.Forms.PictureBox();
             this.gpbInformacoesServidor = new System.Windows.Forms.GroupBox();
-            this.lblBucketName = new System.Windows.Forms.Label();
             this.txtBucketName = new System.Windows.Forms.TextBox();
+            this.lblBucketName = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcherFlash)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcherHttp)).BeginInit();
             this.gpbPastasMonitoradas.SuspendLayout();
@@ -161,6 +161,15 @@
             this.gpbInformacoesServidor.TabStop = false;
             this.gpbInformacoesServidor.Text = "Informações Amazon S3";
             // 
+            // txtBucketName
+            // 
+            this.txtBucketName.Location = new System.Drawing.Point(99, 29);
+            this.txtBucketName.Name = "txtBucketName";
+            this.txtBucketName.ReadOnly = true;
+            this.txtBucketName.Size = new System.Drawing.Size(100, 23);
+            this.txtBucketName.TabIndex = 1;
+            this.txtBucketName.Text = "teste-alba";
+            // 
             // lblBucketName
             // 
             this.lblBucketName.AutoSize = true;
@@ -170,15 +179,6 @@
             this.lblBucketName.Size = new System.Drawing.Size(92, 17);
             this.lblBucketName.TabIndex = 0;
             this.lblBucketName.Text = "BucketName:";
-            // 
-            // txtBucketName
-            // 
-            this.txtBucketName.Location = new System.Drawing.Point(99, 29);
-            this.txtBucketName.Name = "txtBucketName";
-            this.txtBucketName.ReadOnly = true;
-            this.txtBucketName.Size = new System.Drawing.Size(100, 23);
-            this.txtBucketName.TabIndex = 1;
-            this.txtBucketName.Text = "teste-alba";
             // 
             // frmPrincipal
             // 
