@@ -86,6 +86,8 @@
             this.fileSystemWatcherFlash.Path = "D:\\Flash";
             this.fileSystemWatcherFlash.SynchronizingObject = this;
             this.fileSystemWatcherFlash.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcherFlash_Created);
+            this.fileSystemWatcherFlash.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcherFlash_Deleted);
+            this.fileSystemWatcherFlash.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcherFlash_Renamed);
             // 
             // txtFiltro
             // 
@@ -112,6 +114,8 @@
             this.fileSystemWatcherHttp.Path = "D:\\Http";
             this.fileSystemWatcherHttp.SynchronizingObject = this;
             this.fileSystemWatcherHttp.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcherHttp_Created);
+            this.fileSystemWatcherHttp.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcherHttp_Deleted);
+            this.fileSystemWatcherHttp.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcherHttp_Renamed);
             // 
             // gpbPastasMonitoradas
             // 

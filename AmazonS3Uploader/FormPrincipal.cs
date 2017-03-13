@@ -8,7 +8,7 @@ namespace AmazonS3Uploader
 {
     public partial class frmPrincipal : Form
     {
-        
+
         public frmPrincipal()
         {
             InitializeComponent();
@@ -64,8 +64,20 @@ namespace AmazonS3Uploader
 
         private void FazerUploadAssync(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
         {
-            AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate caller = new AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate(this.fazerUpload);
+            AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate caller = new AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate(this.FazerUpload);
             caller.BeginInvoke(subFolder, fileName, filePath, type, null, null);
+        }
+
+        private void ExclusaoAssync(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        {
+            AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate caller = new AmazonS3Uploader.Delegates.Upload_ExclusaoDelegate(this.ExcluirArquivo);
+            caller.BeginInvoke(subFolder, fileName, filePath, type, null, null);
+        }
+
+        private void RenomeacaoAssync(string oldName, string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        {
+            AmazonS3Uploader.Delegates.RenomeacaoDelegate caller = new AmazonS3Uploader.Delegates.RenomeacaoDelegate(this.RenomearArquivo);
+            caller.BeginInvoke(oldName, subFolder, fileName, filePath, type, null, null);
         }
 
         private void ShowText(string text)
@@ -83,7 +95,7 @@ namespace AmazonS3Uploader
             }
         }
 
-        private void fazerUpload(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        private void FazerUpload(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -101,7 +113,7 @@ namespace AmazonS3Uploader
             {
                 while (mustRepeat)
                 {
-                    Thread.Sleep(5000);
+                    Thread.Sleep(240000);
 
                     Application.DoEvents();
 
@@ -112,7 +124,80 @@ namespace AmazonS3Uploader
                     mustRepeat = false;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ShowText(ex.Message);
+            }
+        }
+
+        private void ExcluirArquivo(string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendFormat("Localizado em: {0} {1}", filePath, Environment.NewLine);
+
+            Informacoes(fileName, type);
+
+            sb.AppendFormat("Excluindo o arquivo {0} do servidor, aguarde...{1}", fileName, Environment.NewLine);
+
+            ShowText(sb.ToString());
+
+            bool mustRepeat = true;
+
+            try
+            {
+                while (mustRepeat)
+                {
+                    Thread.Sleep(10000);
+
+                    Application.DoEvents();
+
+                    AmazonS3 s3 = new AmazonS3(this.ShowText, subFolder, fileName, filePath);
+
+                    s3.DeleteFile();
+
+                    mustRepeat = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowText(ex.Message);
+            }
+        }
+
+        private void RenomearArquivo(string oldName, string subFolder, string fileName, string filePath, WatcherChangeTypes type)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendFormat("Localizado em: {0} {1}", filePath, Environment.NewLine);
+
+            Informacoes(fileName, type);
+
+            sb.AppendFormat("Renomeando o arquivo {0} no servidor, aguarde...{1}", oldName, Environment.NewLine);
+
+            ShowText(sb.ToString());
+
+            bool mustRepeat = true;
+
+            try
+            {
+                while (mustRepeat)
+                {
+                    Thread.Sleep(10000);
+
+                    Application.DoEvents();
+
+                    AmazonS3 s3 = new AmazonS3(this.ShowText, subFolder, fileName, filePath);
+
+                    s3.RenameFile(oldName);
+
+                    mustRepeat = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowText(ex.Message);
+            }
         }
 
         private void Informacoes(string fileName, WatcherChangeTypes type)
@@ -129,13 +214,43 @@ namespace AmazonS3Uploader
         private void fileSystemWatcherFlash_Created(object sender, FileSystemEventArgs e)
         {
             string subFolder = "Flash";
+
             this.FazerUploadAssync(subFolder, e.Name, e.FullPath, e.ChangeType);
+        }
+
+        private void fileSystemWatcherFlash_Deleted(object sender, FileSystemEventArgs e)
+        {
+            string subFolder = "Flash";
+
+            this.ExclusaoAssync(subFolder, e.Name, e.FullPath, e.ChangeType);
+        }
+
+        private void fileSystemWatcherFlash_Renamed(object sender, RenamedEventArgs e)
+        {
+            string subFolder = "Flash";
+
+            this.RenomeacaoAssync(e.OldName, subFolder, e.Name, e.FullPath, e.ChangeType);
         }
 
         private void fileSystemWatcherHttp_Created(object sender, FileSystemEventArgs e)
         {
             string subFolder = "Http";
+
             this.FazerUploadAssync(subFolder, e.Name, e.FullPath, e.ChangeType);
+        }
+
+        private void fileSystemWatcherHttp_Deleted(object sender, FileSystemEventArgs e)
+        {
+            string subFolder = "Http";
+
+            this.ExclusaoAssync(subFolder, e.Name, e.FullPath, e.ChangeType);
+        }
+
+        private void fileSystemWatcherHttp_Renamed(object sender, RenamedEventArgs e)
+        {
+            string subFolder = "Http";
+
+            this.RenomeacaoAssync(e.OldName, subFolder, e.Name, e.FullPath, e.ChangeType);
         }
     }
 }
