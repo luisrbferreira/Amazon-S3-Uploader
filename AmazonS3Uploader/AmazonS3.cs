@@ -161,7 +161,8 @@ namespace AmazonS3Uploader
                         SourceBucket = string.Concat(bucketName, delimiter, subFolder),
                         SourceKey = name,
                         DestinationBucket = string.Concat(bucketName, delimiter, subFolder),
-                        DestinationKey = fileName
+                        DestinationKey = fileName,
+                        StorageClass = S3StorageClass.ReducedRedundancy
                     };
                     CopyObjectResponse response = client.CopyObject(request);
 
