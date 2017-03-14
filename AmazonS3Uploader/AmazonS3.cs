@@ -68,18 +68,11 @@ namespace AmazonS3Uploader
                     CannedACL = S3CannedACL.PublicRead
                 };
 
+                fileTransferUtilityRequest.UploadProgressEvent +=
+                    new EventHandler<UploadProgressArgs>
+                    (fileTransferUtilityRequest_UploadPartProgressEvent);
+
                 fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
-
-                string message = string.Format("-------------------------------------------------------------------------------------------------------------------------------------------------{0}Upload do arquivo {1} feito com Sucesso!{2}", Environment.NewLine, fileName, Environment.NewLine);
-
-                if (this.showTextCallback == null)
-                {
-                    MessageBox.Show(message);
-                }
-                else
-                {
-                    this.showTextCallback(message);
-                }
             }
             catch (AmazonS3Exception s3Exception)
             {
@@ -90,6 +83,23 @@ namespace AmazonS3Uploader
                     MessageBox.Show(s3Exception.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
+                else
+                {
+                    this.showTextCallback(message);
+                }
+            }
+        }
+
+        private void fileTransferUtilityRequest_UploadPartProgressEvent(object sender, UploadProgressArgs e)
+        {
+            if (e.TransferredBytes == e.TotalBytes)
+            {
+                string message = string.Format("-------------------------------------------------------------------------------------------------------------------------------------------------{0}Upload do arquivo {1} feito com Sucesso!{2}", Environment.NewLine, fileName, Environment.NewLine);
+
+                if (this.showTextCallback == null)
+                {
+                    MessageBox.Show(message);
+                }
                 else
                 {
                     this.showTextCallback(message);

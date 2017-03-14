@@ -68,7 +68,7 @@
             this.txtNotificacoes.ReadOnly = true;
             this.txtNotificacoes.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtNotificacoes.Size = new System.Drawing.Size(469, 289);
-            this.txtNotificacoes.TabIndex = 1;
+            this.txtNotificacoes.TabIndex = 0;
             // 
             // txtFlash
             // 
